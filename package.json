@@ -7,9 +7,11 @@
   "license": "UNLICENSED",
   "scripts": {
     "build": "nest build",
+    "prod:docker": "docker-compose -f docker-compose.prod.yml up",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "dev": "NODE_ENV=development nest start --watch",
+    "dev:docker": "docker-compose -f docker-compose.dev.yml up",
     "debug": "nest start --debug --watch",
     "prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",

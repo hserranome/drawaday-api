@@ -1,0 +1,14 @@
+FROM node:20
+
+WORKDIR /api
+
+COPY package.json ./
+COPY yarn.lock ./
+
+RUN yarn
+
+COPY . .
+
+RUN yarn build
+
+CMD [ "node", "dist/main.js" ]
