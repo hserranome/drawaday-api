@@ -8,10 +8,14 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { authConfig } from './config/auth.config';
 
+const IS_DEV = process.env.NODE_ENV === 'development';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
-      envFilePath: ['.env.development.local', '.env.development', '.env'],
+      envFilePath: IS_DEV
+        ? ['.env', '.env.development.local', '.env.development']
+        : ['.env', '.env.production.local', '.env.production'],
       load: [dataSourceConfig, authConfig],
       isGlobal: true,
     }),
