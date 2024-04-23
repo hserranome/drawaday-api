@@ -3,6 +3,9 @@ import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import 'dotenv/config';
 
+const entities = ['**/*.entity{ .ts,.js}'];
+const migrations = ['src/database/migrations/*{.ts,.js}'];
+
 export const typeOrmDataSource = new DataSource({
   type: (process.env.TYPE as any) ?? 'postgres',
   host: 'localhost', // @todo: change to process.env.DB_HOST
@@ -11,8 +14,8 @@ export const typeOrmDataSource = new DataSource({
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
   synchronize: !!process.env.DB_SYNCHRONIZE,
-  entities: ['**/*.entity{ .ts,.js}'],
-  migrations: ['dist/db/migrations/*{.ts,.js}'],
+  entities,
+  migrations,
 });
 
 export const DATABASE_CONFIG_KEY = 'database';
@@ -26,7 +29,7 @@ export const registerDatabaseConfig = registerAs(
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
     synchronize: !!process.env.DB_SYNCHRONIZE,
-    entities: ['**/*.entity{ .ts,.js}'],
-    migrations: ['dist/db/migrations/*{.ts,.js}'],
+    entities,
+    migrations,
   }),
 );
