@@ -1,25 +1,23 @@
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule } from '@nestjs/config';
-import { dataSourceConfig } from './config/database.config';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
-import { authConfig } from './config/auth.config';
-
-const IS_DEV = process.env.NODE_ENV === 'development';
+import {
+  DATABASE_CONFIG_KEY,
+  registerDatabaseConfig,
+} from './database/database.config';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      envFilePath: IS_DEV
-        ? ['.env', '.env.development.local', '.env.development']
-        : ['.env', '.env.production.local', '.env.production'],
-      load: [dataSourceConfig, authConfig],
-      isGlobal: true,
+    ConfigModule.forRoot({ load: [registerDatabaseConfig] }),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => config.get(DATABASE_CONFIG_KEY),
     }),
-    TypeOrmModule.forRoot(dataSourceConfig()),
     AuthModule,
     UsersModule,
   ],
