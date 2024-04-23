@@ -10,7 +10,9 @@ import {
 import { AuthService } from './auth.service';
 import { SignInDto } from './auth.constants';
 import { LocalAuthGuard } from './local-auth.guard';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
+@ApiBearerAuth()
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
@@ -19,6 +21,6 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   @Post('login')
   async login(@Body() _body: SignInDto, @Request() req) {
-    return req.user;
+    return this.authService.login(req.user);
   }
 }
