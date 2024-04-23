@@ -30,6 +30,5 @@ export const registerDatabaseConfig = registerAs(
     database: process.env.DB_NAME,
     synchronize: !!process.env.DB_SYNCHRONIZE,
     entities,
-    migrations,
   }),
 );
