@@ -7,6 +7,7 @@ import {
   DATABASE_CONFIG_KEY,
   registerDatabaseConfig,
 } from './database/database.config';
+import { PostsModule } from './posts/posts.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import {
     }),
     UsersModule,
     AuthModule,
+    PostsModule,
   ],
 })
 export class AppModule {}
