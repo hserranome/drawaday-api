@@ -8,9 +8,9 @@ import {
   Body,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { SignInDto } from './auth.constants';
 import { LocalAuthGuard } from './local-auth.guard';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import { SignInDto } from './dto/sign-in.dto';
 
 @ApiBearerAuth()
 @Controller('auth')
