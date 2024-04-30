@@ -11,7 +11,10 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async validateUser(email: string, pass: string): Promise<any> {
+  async validateUser(
+    email: User['email'],
+    pass: User['password'],
+  ): Promise<User> {
     const user = await this.usersService.findOneByEmail(email);
     if (!user) return null;
 
@@ -19,15 +22,15 @@ export class AuthService {
     if (!isMatch) return null;
 
     const { password, ...userWithoutPassword } = user;
-    return userWithoutPassword;
+    return userWithoutPassword as User;
   }
 
-  async generateAccessToken(user: User) {
-    const payload = { email: user.email, sub: user.id };
-    return { access_token: this.jwtService.sign(payload) };
+  async generateAccessToken({ id, email }: User): Promise<string> {
+    const payload = { email: email, sub: id };
+    return this.jwtService.sign(payload);
   }
 
-  async hashPassword(password: string) {
+  async hashPassword(password: User['password']): Promise<string> {
     const saltRounds = 10; //@todo make constant
     return await hash(password, saltRounds);
   }

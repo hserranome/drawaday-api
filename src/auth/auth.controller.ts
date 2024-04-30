@@ -28,7 +28,8 @@ export class AuthController {
   @UseGuards(AuthGuard('local'))
   @Post('login')
   async login(@Body() _body: SignInDto, @Request() req) {
-    return this.authService.generateAccessToken(req.user);
+    const access_token = this.authService.generateAccessToken(req.user);
+    return { access_token };
   }
 
   @Public()
