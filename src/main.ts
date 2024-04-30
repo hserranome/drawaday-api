@@ -5,14 +5,20 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Setup Swagger API documentation
-  const config = new DocumentBuilder()
-    .setTitle(process.env.npm_package_name)
-    .setVersion(process.env.npm_package_version)
-    .addBearerAuth()
-    .build();
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
+  const swaggerDocument = SwaggerModule.createDocument(
+    app,
+    new DocumentBuilder()
+      .setTitle(process.env.npm_package_name)
+      .setVersion(process.env.npm_package_version)
+      .addBearerAuth()
+      .addSecurityRequirements('bearer')
+      .build(),
+  );
+  SwaggerModule.setup('api', app, swaggerDocument, {
+    swaggerOptions: {
+      persistAuthorization: true,
+    },
+  });
 
   await app.listen(process.env.PORT || 3000);
 }
