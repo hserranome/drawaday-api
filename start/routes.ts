@@ -35,12 +35,16 @@ router
   .group(() => {
     router
       .group(() => {
-
         router.post('register', [UsersController, 'store'])
         router.post('login', [SessionController, 'store'])
-        router.delete('logout', [SessionController, 'destroy'])
-          .use(middleware.auth({ guards: ['api'] }))
-
       }).prefix('auth')
+
+    router
+      .group(() => {
+        router.delete('auth/logout', [SessionController, 'destroy'])
+        router.get('users/me', [UsersController, 'me'])
+        router.patch('users/me', [UsersController, 'update'])
+      })
+      .use(middleware.auth({ guards: ['api'] }))
   })
   .prefix('api')

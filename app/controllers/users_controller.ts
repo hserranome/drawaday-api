@@ -1,7 +1,7 @@
 import User from '#models/user'
 import hash from '@adonisjs/core/services/hash'
 import { HttpContext } from '@adonisjs/core/http'
-import { createUserValidator } from '#validators/user'
+import { createUserValidator, updateUserValidator } from '#validators/user'
 
 export default class UsersController {
     /**
@@ -22,5 +22,39 @@ export default class UsersController {
         })
 
         return response.created(user.serialize())
+    }
+
+    /**
+     * @me
+     * @summary Get current user profile
+     * @tag User
+     * @responseBody 200 - <User> - Current user profile
+     */
+    async me({ auth, response }: HttpContext) {
+        const user = auth.user!
+        return response.ok(user.serialize())
+    }
+
+    /**
+     * @update
+     * @summary Update current user profile
+     * @tag User
+     * @requestBody <updateUserValidator>
+     * @responseBody 200 - <User> - Updated user profile
+     */
+    async update({ request, auth, response }: HttpContext) {
+        const data = request.only(['fullName', 'email', 'password'])
+        const payload = await updateUserValidator.validate(data)
+
+        const user = auth.user!
+        // Hash password if provided, then merge the rest in one call
+        if (payload.password !== undefined) {
+            payload.password = await hash.make(payload.password)
+        }
+
+        user.merge(payload)
+        await user.save()
+
+        return response.ok(user.serialize())
     }
 }
