@@ -37,7 +37,7 @@ router
   .group(() => {
     router
       .group(() => {
-        router.get('users', [UsersController, 'index'])
+        router.post('users', [UsersController, 'store'])
 
         router.post('session', [SessionController, 'store'])
         router.delete('session', [SessionController, 'destroy'])
