@@ -22,7 +22,7 @@ router.get("/swagger", async () => {
 
 router.get("/docs", async () => {
   // Renders Swagger-UI and passes YAML-output of /swagger
-  return AutoSwagger.default.scalar("/swagger"); // to use Scalar instead. If you want, you can pass proxy url as second argument here.
+  return AutoSwagger.default.scalar("/swagger");
 });
 
 router.get('/', async () => {
@@ -35,12 +35,12 @@ router
   .group(() => {
     router
       .group(() => {
-        router.post('users', [UsersController, 'store'])
 
-        router.post('session', [SessionController, 'store'])
-        router.delete('session', [SessionController, 'destroy'])
+        router.post('register', [UsersController, 'store'])
+        router.post('login', [SessionController, 'store'])
+        router.delete('logout', [SessionController, 'destroy'])
           .use(middleware.auth({ guards: ['api'] }))
-      })
-      .prefix('v1')
+
+      }).prefix('auth')
   })
   .prefix('api')

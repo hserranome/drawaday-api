@@ -6,7 +6,10 @@ import { createUserValidator } from '#validators/user'
 export default class UsersController {
     /**
      * @store
-     * @requestBody 200 - <createUserValidator.toJSON()>
+     * @summary Registers a new user
+     * @tag Auth
+     * @requestBody <createUserValidator>
+     * @responseBody 201 - <User> - User created
      */
     async store({ request, response }: HttpContext) {
         const data = request.only(['fullName', 'email', 'password'])
