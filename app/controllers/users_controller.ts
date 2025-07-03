@@ -1,5 +1,4 @@
 import User from '#models/user'
-import hash from '@adonisjs/core/services/hash'
 import { HttpContext } from '@adonisjs/core/http'
 import { createUserValidator, updateUserValidator } from '#validators/user'
 
@@ -18,7 +17,9 @@ export default class UsersController {
         const user = await User.create({
             fullName: payload.fullName,
             email: payload.email,
-            password: await hash.make(payload.password),
+            // AuthFinder mixin registers a beforeSave hook to automatically hash the user passwords
+            // https://docs.adonisjs.com/guides/authentication/verifying-user-credentials#hashing-user-password
+            password: payload.password
         })
 
         return response.created(user.serialize())
