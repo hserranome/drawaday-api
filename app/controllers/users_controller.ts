@@ -46,11 +46,9 @@ export default class UsersController {
         const data = request.only(['fullName', 'email', 'password'])
         const payload = await updateUserValidator.validate(data)
 
+        delete payload.password
+
         const user = auth.user!
-        // Hash password if provided, then merge the rest in one call
-        if (payload.password !== undefined) {
-            payload.password = await hash.make(payload.password)
-        }
 
         user.merge(payload)
         await user.save()
