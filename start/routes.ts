@@ -10,14 +10,18 @@
 import router from '@adonisjs/core/services/router'
 import AutoSwagger from "adonis-autoswagger";
 import swagger from "#config/swagger";
+import { middleware } from './kernel.js';
 
-// returns swagger in YAML
+const UsersController = () => import("#controllers/users_controller")
+const SessionController = () => import("#controllers/session_controller")
+
 router.get("/swagger", async () => {
+  // returns swagger in YAML
   return AutoSwagger.default.docs(router.toJSON(), swagger);
 });
 
-// Renders Swagger-UI and passes YAML-output of /swagger
 router.get("/docs", async () => {
+  // Renders Swagger-UI and passes YAML-output of /swagger
   return AutoSwagger.default.ui("/swagger", swagger);
   // return AutoSwagger.default.scalar("/swagger"); to use Scalar instead. If you want, you can pass proxy url as second argument here.
   // return AutoSwagger.default.rapidoc("/swagger", "view"); to use RapiDoc instead (pass "view" default, or "read" to change the render-style)
@@ -25,6 +29,20 @@ router.get("/docs", async () => {
 
 router.get('/', async () => {
   return {
-    hello: 'world',
+    status: 'ok'
   }
 })
+
+router
+  .group(() => {
+    router
+      .group(() => {
+        router.get('users', [UsersController, 'index'])
+
+        router.post('session', [SessionController, 'store'])
+        router.delete('session', [SessionController, 'destroy'])
+          .use(middleware.auth({ guards: ['api'] }))
+      })
+      .prefix('v1')
+  })
+  .prefix('api')
