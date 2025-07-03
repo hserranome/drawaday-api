@@ -21,12 +21,6 @@ export default class UsersController {
             password: await hash.make(payload.password),
         })
 
-        // TODO: Create this on email confirmation instead
-        const token = await User.accessTokens.create(user)
-
-        return response.created({
-            user: user.serialize(),
-            token: token.value,
-        })
+        return response.created(user.serialize())
     }
 }
