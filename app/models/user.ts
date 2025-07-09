@@ -1,5 +1,7 @@
 import { DateTime } from 'luxon'
 import hash from '@adonisjs/core/services/hash'
+import { beforeCreate } from '@adonisjs/lucid/orm'
+import crypto from 'node:crypto'
 import { compose } from '@adonisjs/core/helpers'
 import { BaseModel, column } from '@adonisjs/lucid/orm'
 import { withAuthFinder } from '@adonisjs/auth/mixins/lucid'
@@ -12,7 +14,7 @@ const AuthFinder = withAuthFinder(() => hash.use('argon'), {
 
 export default class User extends compose(BaseModel, AuthFinder) {
   @column({ isPrimary: true })
-  declare id: number
+  declare id: string
 
   @column()
   declare fullName: string | null
@@ -36,4 +38,9 @@ export default class User extends compose(BaseModel, AuthFinder) {
     type: 'auth_token',
     tokenSecretLength: 40,
   })
+
+  @beforeCreate()
+  static assignUuid(user: User) {
+    user.id = crypto.randomUUID()
+  }
 }

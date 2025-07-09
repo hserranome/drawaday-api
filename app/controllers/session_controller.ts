@@ -14,8 +14,8 @@ export default class SessionController {
         const data = request.only(['email', 'password'])
         const { email, password } = await createSessionValidator.validate(data)
         const user = await User.verifyCredentials(email, password)
-
-        return await auth.use('api').createToken(user)
+        const token = await auth.use('api').createToken(user)
+        return token;
     }
 
     /**
