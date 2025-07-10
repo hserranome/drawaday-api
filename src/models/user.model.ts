@@ -19,12 +19,17 @@ export const selectUserSchema = z.object({
   createdAt: z.date(),
 });
 
-export const updateUserSchema = z.object({
-  id: z.string().uuid().optional(),
-  email: z.string().email('Invalid email format').optional(),
-  password: z.string().min(6, 'Password must be at least 6 characters long').optional(),
-  createdAt: z.date().optional(),
-}).partial();
+export const updateUserSchema = z
+  .object({
+    id: z.string().uuid().optional(),
+    email: z.string().email('Invalid email format').optional(),
+    password: z
+      .string()
+      .min(6, 'Password must be at least 6 characters long')
+      .optional(),
+    createdAt: z.date().optional(),
+  })
+  .partial();
 
 // Utility types
 export type UserWithoutPassword = Omit<User, 'password'>;

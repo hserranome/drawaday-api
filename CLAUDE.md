@@ -6,6 +6,54 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - Disabling eslint rules (e.g., with eslint-disable comments) should only be used as a last resort or for clarity/future-proofing. Prefer to address linter warnings by refactoring code (such as removing unused parameters) whenever possible.
 
+## CORE DEVELOPMENT PRINCIPLES
+- Always follow the TDD cycle: Red → Green → Refactor
+    - Red (write failing tests) — think about _what_ you want to develop
+    - Green (write code that passes tests) — think about _how_ to make your tests pass
+    - Refactor (improve the solution, having the tests as guidelines) — think about _how_ to improve your existing implementation
+- Write the simplest failing test first (Red)
+- Implement the minimum code needed to make tests pass (Green)
+- Refactor only after tests are passing (Refactor)
+- Follow Beck's "Tidy First" approach by separating structural changes from behavioral changes
+- Maintain high code quality throughout development
+
+## TDD METHODOLOGY GUIDANCE
+- Start by writing a failing test that defines a small increment of functionality
+- Use meaningful test names that describe behavior (e.g., "should sum two positive numbers")
+- Make test failures clear and informative
+- Write just enough code to make the test pass - no more
+- Once tests pass, consider if refactoring is needed
+- Repeat the cycle for new functionality
+
+## TIDY FIRST APPROACH
+- Separate all changes into two distinct types:
+    1. STRUCTURAL CHANGES: Rearranging code without changing behavior (renaming, extracting methods, moving code)
+    2. BEHAVIORAL CHANGES: Adding or modifying actual functionality
+- Never mix structural and behavioral changes in the same commit
+- Always make structural changes first when both are needed
+- Validate structural changes do not alter behavior by running tests before and after
+
+## Test-Driven Development (TDD) Guidelines
+
+### Key Principles
+- **Tests should tell the truth**: Write tests that clearly express what the code should do
+- **Only test what's important**: Focus on behavior that matters to users and business logic
+- **Code coverage doesn't matter**: Prioritize test quality over coverage metrics
+
+### Testing Approach
+- **Unit Tests**: For services and business logic (AuthService, UserService, etc.)
+- **Integration Tests**: For controllers and API endpoints (AuthController, ProfileController)
+- **E2E Tests**: For complete user workflows and database interactions
+
+### Testing Conventions
+- Test files should be co-located with source files using `.spec.ts` suffix
+- Use descriptive test names that explain the expected behavior
+- Group related tests using `describe` blocks
+- Use `beforeEach`/`afterEach` for test setup and cleanup
+- Mock external dependencies but test real database interactions in integration tests
+- Focus on testing public interfaces and observable behavior
+- Avoid testing implementation details
+
 ## Project Overview
 
 This is a NestJS TypeScript API for "Draw a Day" application. It's a REST API with authentication, user management, and profile functionality.
