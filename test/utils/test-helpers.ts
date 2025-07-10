@@ -2,10 +2,12 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { MikroORM } from '@mikro-orm/core';
+import { EntityRepository } from '@mikro-orm/sqlite';
 import { AppModule } from '../../src/app.module';
 import { User } from '../../src/entities/user.entity';
 import { ZodExceptionFilter } from '../../src/common/filters/zod-exception.filter';
 import { UserWithoutPassword } from '../../src/models/user.model';
+import { UserService } from '../../src/user/user.service';
 
 export interface TestUser {
   email: string;
@@ -51,7 +53,7 @@ export async function createTestUser(
   app: INestApplication,
   userData: TestUser,
 ): Promise<TestUserWithToken> {
-  const userService = app.get('UserService');
+  const userService = app.get(UserService);
   const jwtService = app.get(JwtService);
 
   const user = await userService.createUser(userData.email, userData.password);
@@ -128,7 +130,7 @@ export const testUsers = {
  * Common test assertions
  */
 export const testAssertions = {
-  shouldHaveUserResponse: (response: any) => {
+  shouldHaveUserResponse: (response: Record<string, unknown>) => {
     expect(response).toHaveProperty('user');
     expect(response).toHaveProperty('access_token');
     expect(response.user).not.toHaveProperty('password');
@@ -138,7 +140,15 @@ export const testAssertions = {
   },
 
   shouldHaveValidationError: (
-    response: any,
+    response: Record<
+      string,
+      {
+        body: {
+          message: string;
+          errors: Array<{ field: string; message: string }>;
+        };
+      }
+    >,
     field: string,
     message: string,
   ) => {
@@ -149,7 +159,9 @@ export const testAssertions = {
     });
   },
 
-  shouldBeUnauthorized: (response: any) => {
+  shouldBeUnauthorized: (
+    response: Record<string, { status: number; body: { message: string } }>,
+  ) => {
     expect(response.status).toBe(401);
     expect(response.body.message).toBe('Unauthorized');
   },
@@ -161,7 +173,7 @@ export const testAssertions = {
 export class TestDatabase {
   private app: INestApplication;
   private orm: MikroORM;
-  private userRepository: any;
+  private userRepository: EntityRepository<User>;
 
   constructor(app: INestApplication) {
     this.app = app;
@@ -173,8 +185,8 @@ export class TestDatabase {
     await this.userRepository.nativeDelete({});
   }
 
-  async createUser(userData: TestUser): Promise<User> {
-    const userService = this.app.get('UserService');
+  async createUser(userData: TestUser): Promise<UserWithoutPassword> {
+    const userService = this.app.get(UserService);
     return await userService.createUser(userData.email, userData.password);
   }
 

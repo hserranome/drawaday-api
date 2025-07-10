@@ -1,8 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import {
-  ConflictException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { ConflictException, UnauthorizedException } from '@nestjs/common';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { SignupDto } from './dto/signup.dto';
@@ -50,7 +47,7 @@ describe('AuthController', () => {
 
       const result = await authController.signup(validSignupDto);
 
-      expect(authService.signup).toHaveBeenCalledWith(validSignupDto);
+      expect(authService.signup.mock.calls[0]).toEqual([validSignupDto]);
       expect(result).toEqual(mockAuthResponse);
     });
 
@@ -62,7 +59,7 @@ describe('AuthController', () => {
       await expect(authController.signup(validSignupDto)).rejects.toThrow(
         ConflictException,
       );
-      expect(authService.signup).toHaveBeenCalledWith(validSignupDto);
+      expect(authService.signup.mock.calls[0]).toEqual([validSignupDto]);
     });
 
     it('should handle service errors appropriately', async () => {
@@ -86,7 +83,7 @@ describe('AuthController', () => {
 
       const result = await authController.login(validLoginDto);
 
-      expect(authService.login).toHaveBeenCalledWith(validLoginDto);
+      expect(authService.login.mock.calls[0]).toEqual([validLoginDto]);
       expect(result).toEqual(mockAuthResponse);
     });
 
@@ -98,7 +95,7 @@ describe('AuthController', () => {
       await expect(authController.login(validLoginDto)).rejects.toThrow(
         UnauthorizedException,
       );
-      expect(authService.login).toHaveBeenCalledWith(validLoginDto);
+      expect(authService.login.mock.calls[0]).toEqual([validLoginDto]);
     });
 
     it('should handle service errors appropriately', async () => {
@@ -113,12 +110,12 @@ describe('AuthController', () => {
 
   describe('integration with validation pipe', () => {
     it('should have signup endpoint defined', () => {
-      expect(authController.signup).toBeDefined();
+      expect('signup' in authController).toBe(true);
       expect(typeof authController.signup).toBe('function');
     });
 
     it('should have login endpoint defined', () => {
-      expect(authController.login).toBeDefined();
+      expect('login' in authController).toBe(true);
       expect(typeof authController.login).toBe('function');
     });
   });
@@ -127,24 +124,34 @@ describe('AuthController', () => {
     it('should return 201 status for successful signup', async () => {
       authService.signup.mockResolvedValue(mockAuthResponse);
 
-      const result = await authController.signup({
+      await authController.signup({
         email: 'test@example.com',
         password: 'password123',
       });
 
-      expect(result).toEqual(mockAuthResponse);
+      expect(authService.signup.mock.calls[0]).toEqual([
+        {
+          email: 'test@example.com',
+          password: 'password123',
+        },
+      ]);
       // Status code is handled by @HttpCode decorator
     });
 
     it('should return 200 status for successful login', async () => {
       authService.login.mockResolvedValue(mockAuthResponse);
 
-      const result = await authController.login({
+      await authController.login({
         email: 'test@example.com',
         password: 'password123',
       });
 
-      expect(result).toEqual(mockAuthResponse);
+      expect(authService.login.mock.calls[0]).toEqual([
+        {
+          email: 'test@example.com',
+          password: 'password123',
+        },
+      ]);
       // Status code is handled by @HttpCode decorator
     });
   });

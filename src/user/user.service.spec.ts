@@ -75,21 +75,23 @@ describe('UserService', () => {
 
       const result = await userService.createUser(mockEmail, mockPassword);
 
-      expect(userRepository.findOne).toHaveBeenCalledWith({
-        email: mockEmail,
-      });
-      expect(mockBcrypt.hash).toHaveBeenCalledWith(mockPassword, 10);
-      expect(entityManager.persistAndFlush).toHaveBeenCalledWith(
+      expect(userRepository.findOne.mock.calls[0]).toEqual([
+        {
+          email: mockEmail,
+        },
+      ]);
+      expect(mockBcrypt.hash.mock.calls[0]).toEqual([mockPassword, 10]);
+      expect(entityManager.persistAndFlush.mock.calls[0]).toEqual([
         expect.objectContaining({
           id: mockUserId,
           email: mockEmail,
           password: mockHashedPassword,
         }),
-      );
+      ]);
       expect(result).toEqual({
         id: mockUserId,
         email: mockEmail,
-        createdAt: expect.any(Date),
+        createdAt: expect.any(Date) as Date,
       });
     });
 
@@ -100,11 +102,13 @@ describe('UserService', () => {
         userService.createUser(mockEmail, mockPassword),
       ).rejects.toThrow('User with this email already exists');
 
-      expect(userRepository.findOne).toHaveBeenCalledWith({
-        email: mockEmail,
-      });
-      expect(mockBcrypt.hash).not.toHaveBeenCalled();
-      expect(entityManager.persistAndFlush).not.toHaveBeenCalled();
+      expect(userRepository.findOne.mock.calls[0]).toEqual([
+        {
+          email: mockEmail,
+        },
+      ]);
+      expect(mockBcrypt.hash.mock.calls).toHaveLength(0);
+      expect(entityManager.persistAndFlush.mock.calls).toHaveLength(0);
     });
 
     it('should hash password with correct salt rounds', async () => {
@@ -113,7 +117,7 @@ describe('UserService', () => {
 
       await userService.createUser(mockEmail, mockPassword);
 
-      expect(mockBcrypt.hash).toHaveBeenCalledWith(mockPassword, 10);
+      expect(mockBcrypt.hash.mock.calls[0]).toEqual([mockPassword, 10]);
     });
   });
 
@@ -123,9 +127,11 @@ describe('UserService', () => {
 
       const result = await userService.findByEmail(mockEmail);
 
-      expect(userRepository.findOne).toHaveBeenCalledWith({
-        email: mockEmail,
-      });
+      expect(userRepository.findOne.mock.calls[0]).toEqual([
+        {
+          email: mockEmail,
+        },
+      ]);
       expect(result).toEqual(mockUser);
     });
 
@@ -134,9 +140,11 @@ describe('UserService', () => {
 
       const result = await userService.findByEmail(mockEmail);
 
-      expect(userRepository.findOne).toHaveBeenCalledWith({
-        email: mockEmail,
-      });
+      expect(userRepository.findOne.mock.calls[0]).toEqual([
+        {
+          email: mockEmail,
+        },
+      ]);
       expect(result).toBeNull();
     });
   });
@@ -147,9 +155,11 @@ describe('UserService', () => {
 
       const result = await userService.findById(mockUserId);
 
-      expect(userRepository.findOne).toHaveBeenCalledWith({
-        id: mockUserId,
-      });
+      expect(userRepository.findOne.mock.calls[0]).toEqual([
+        {
+          id: mockUserId,
+        },
+      ]);
       expect(result).toEqual({
         id: mockUserId,
         email: mockEmail,
@@ -163,9 +173,11 @@ describe('UserService', () => {
 
       const result = await userService.findById(mockUserId);
 
-      expect(userRepository.findOne).toHaveBeenCalledWith({
-        id: mockUserId,
-      });
+      expect(userRepository.findOne.mock.calls[0]).toEqual([
+        {
+          id: mockUserId,
+        },
+      ]);
       expect(result).toBeNull();
     });
   });
@@ -179,10 +191,10 @@ describe('UserService', () => {
         mockHashedPassword,
       );
 
-      expect(mockBcrypt.compare).toHaveBeenCalledWith(
+      expect(mockBcrypt.compare.mock.calls[0]).toEqual([
         mockPassword,
         mockHashedPassword,
-      );
+      ]);
       expect(result).toBe(true);
     });
 
@@ -194,10 +206,10 @@ describe('UserService', () => {
         mockHashedPassword,
       );
 
-      expect(mockBcrypt.compare).toHaveBeenCalledWith(
+      expect(mockBcrypt.compare.mock.calls[0]).toEqual([
         'wrongPassword',
         mockHashedPassword,
-      );
+      ]);
       expect(result).toBe(false);
     });
   });

@@ -2,15 +2,17 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
-import { DatabaseModule } from '../src/db/database.module';
 import { MikroORM } from '@mikro-orm/core';
 import { User } from '../src/entities/user.entity';
 import { ZodExceptionFilter } from '../src/common/filters/zod-exception.filter';
+import {
+  LoginResponseDto,
+  UserResponseDto,
+} from '../src/common/dto/api-response.dto';
 
 describe('Authentication Flow (e2e)', () => {
   let app: INestApplication;
   let orm: MikroORM;
-  let userRepository: any;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -28,10 +30,10 @@ describe('Authentication Flow (e2e)', () => {
 
     // Get database connection for cleanup
     orm = app.get(MikroORM);
-    userRepository = orm.em.getRepository(User);
   });
 
   afterAll(async () => {
+    await orm.close();
     await app.close();
   });
 
@@ -55,10 +57,15 @@ describe('Authentication Flow (e2e)', () => {
 
       expect(signupResponse.body).toHaveProperty('user');
       expect(signupResponse.body).toHaveProperty('access_token');
-      expect(signupResponse.body.user.email).toBe(testUser.email);
-      expect(signupResponse.body.user).not.toHaveProperty('password');
+      expect((signupResponse.body as LoginResponseDto).user.email).toBe(
+        testUser.email,
+      );
+      expect((signupResponse.body as LoginResponseDto).user).not.toHaveProperty(
+        'password',
+      );
 
-      const { access_token: signupToken } = signupResponse.body;
+      const { access_token: signupToken } =
+        signupResponse.body as LoginResponseDto;
 
       // 2. Login with same credentials
       const loginResponse = await request(app.getHttpServer())
@@ -68,10 +75,15 @@ describe('Authentication Flow (e2e)', () => {
 
       expect(loginResponse.body).toHaveProperty('user');
       expect(loginResponse.body).toHaveProperty('access_token');
-      expect(loginResponse.body.user.email).toBe(testUser.email);
-      expect(loginResponse.body.user).not.toHaveProperty('password');
+      expect((loginResponse.body as LoginResponseDto).user.email).toBe(
+        testUser.email,
+      );
+      expect((loginResponse.body as LoginResponseDto).user).not.toHaveProperty(
+        'password',
+      );
 
-      const { access_token: loginToken } = loginResponse.body;
+      const { access_token: loginToken } =
+        loginResponse.body as LoginResponseDto;
 
       // 3. Access profile with signup token
       const profileResponse1 = await request(app.getHttpServer())
@@ -79,7 +91,9 @@ describe('Authentication Flow (e2e)', () => {
         .set('Authorization', `Bearer ${signupToken}`)
         .expect(200);
 
-      expect(profileResponse1.body.email).toBe(testUser.email);
+      expect((profileResponse1.body as UserResponseDto).email).toBe(
+        testUser.email,
+      );
       expect(profileResponse1.body).not.toHaveProperty('password');
 
       // 4. Access profile with login token
@@ -88,11 +102,15 @@ describe('Authentication Flow (e2e)', () => {
         .set('Authorization', `Bearer ${loginToken}`)
         .expect(200);
 
-      expect(profileResponse2.body.email).toBe(testUser.email);
+      expect((profileResponse2.body as UserResponseDto).email).toBe(
+        testUser.email,
+      );
       expect(profileResponse2.body).not.toHaveProperty('password');
 
       // 5. Verify user persisted in database
-      const dbUser = await orm.em.fork().findOne(User, { email: testUser.email });
+      const dbUser = await orm.em
+        .fork()
+        .findOne(User, { email: testUser.email });
       expect(dbUser).toBeTruthy();
       expect(dbUser!.email).toBe(testUser.email);
       expect(dbUser!.password).not.toBe(testUser.password); // Should be hashed
@@ -111,7 +129,7 @@ describe('Authentication Flow (e2e)', () => {
         .send(testUser)
         .expect(409);
 
-      expect(duplicateResponse.body.message).toBe(
+      expect((duplicateResponse.body as { message: string }).message).toBe(
         'User with this email already exists',
       );
     });
@@ -129,7 +147,9 @@ describe('Authentication Flow (e2e)', () => {
         .send({ ...testUser, password: 'wrongpassword' })
         .expect(401);
 
-      expect(wrongPasswordResponse.body.message).toBe('Invalid credentials');
+      expect((wrongPasswordResponse.body as { message: string }).message).toBe(
+        'Invalid credentials',
+      );
 
       // Login with wrong email
       const wrongEmailResponse = await request(app.getHttpServer())
@@ -137,7 +157,9 @@ describe('Authentication Flow (e2e)', () => {
         .send({ ...testUser, email: 'wrong@example.com' })
         .expect(401);
 
-      expect(wrongEmailResponse.body.message).toBe('Invalid credentials');
+      expect((wrongEmailResponse.body as { message: string }).message).toBe(
+        'Invalid credentials',
+      );
     });
 
     it('should reject profile access without authentication', async () => {
@@ -145,7 +167,9 @@ describe('Authentication Flow (e2e)', () => {
         .get('/api/profile')
         .expect(401);
 
-      expect(response.body.message).toBe('Unauthorized');
+      expect((response.body as { message: string }).message).toBe(
+        'Unauthorized',
+      );
     });
 
     it('should reject profile access with invalid token', async () => {
@@ -154,7 +178,9 @@ describe('Authentication Flow (e2e)', () => {
         .set('Authorization', 'Bearer invalid-token')
         .expect(401);
 
-      expect(response.body.message).toBe('Unauthorized');
+      expect((response.body as { message: string }).message).toBe(
+        'Unauthorized',
+      );
     });
 
     it('should reject profile access with expired token', async () => {
@@ -165,7 +191,9 @@ describe('Authentication Flow (e2e)', () => {
         .set('Authorization', 'Bearer expired.token.here')
         .expect(401);
 
-      expect(response.body.message).toBe('Unauthorized');
+      expect((response.body as { message: string }).message).toBe(
+        'Unauthorized',
+      );
     });
   });
 
@@ -176,8 +204,22 @@ describe('Authentication Flow (e2e)', () => {
         .send({ email: 'invalid-email', password: 'password123' })
         .expect(400);
 
-      expect(invalidEmailResponse.body.message).toBe('Validation failed');
-      expect(invalidEmailResponse.body.errors).toEqual([
+      expect(
+        (
+          invalidEmailResponse.body as {
+            message: string;
+            errors: Array<{ field: string; message: string }>;
+          }
+        ).message,
+      ).toBe('Validation failed');
+      expect(
+        (
+          invalidEmailResponse.body as {
+            message: string;
+            errors: Array<{ field: string; message: string }>;
+          }
+        ).errors,
+      ).toEqual([
         {
           field: 'email',
           message: 'Invalid email format',
@@ -191,8 +233,22 @@ describe('Authentication Flow (e2e)', () => {
         .send({ email: 'test@example.com', password: '123' })
         .expect(400);
 
-      expect(shortPasswordResponse.body.message).toBe('Validation failed');
-      expect(shortPasswordResponse.body.errors).toEqual([
+      expect(
+        (
+          shortPasswordResponse.body as {
+            message: string;
+            errors: Array<{ field: string; message: string }>;
+          }
+        ).message,
+      ).toBe('Validation failed');
+      expect(
+        (
+          shortPasswordResponse.body as {
+            message: string;
+            errors: Array<{ field: string; message: string }>;
+          }
+        ).errors,
+      ).toEqual([
         {
           field: 'password',
           message: 'Password must be at least 6 characters long',
@@ -206,14 +262,18 @@ describe('Authentication Flow (e2e)', () => {
         .send({ password: 'password123' })
         .expect(400);
 
-      expect(missingEmailResponse.body.message).toBe('Validation failed');
+      expect((missingEmailResponse.body as { message: string }).message).toBe(
+        'Validation failed',
+      );
 
       const missingPasswordResponse = await request(app.getHttpServer())
         .post('/api/auth/login')
         .send({ email: 'test@example.com' })
         .expect(400);
 
-      expect(missingPasswordResponse.body.message).toBe('Validation failed');
+      expect(
+        (missingPasswordResponse.body as { message: string }).message,
+      ).toBe('Validation failed');
     });
 
     it('should reject requests with malformed JSON', async () => {
@@ -222,7 +282,7 @@ describe('Authentication Flow (e2e)', () => {
         .send('invalid-json')
         .expect(400);
 
-      expect(response.body.message).toBeDefined();
+      expect((response.body as { message: string }).message).toBeDefined();
     });
   });
 
@@ -240,7 +300,9 @@ describe('Authentication Flow (e2e)', () => {
         .expect(201);
 
       // Verify in database
-      const dbUser = await orm.em.fork().findOne(User, { email: testUser.email });
+      const dbUser = await orm.em
+        .fork()
+        .findOne(User, { email: testUser.email });
       expect(dbUser).toBeTruthy();
       expect(dbUser!.email).toBe(testUser.email);
       expect(dbUser!.id).toBeDefined();

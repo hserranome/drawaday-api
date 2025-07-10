@@ -6,7 +6,7 @@ export default defineConfig({
   entities: [User],
   dbName: './data/database.sqlite',
   driver: SqliteDriver,
-  debug: process.env.NODE_ENV !== 'production',
+  debug: false,
   migrations: {
     tableName: 'mikro_orm_migrations',
     path: './migrations',

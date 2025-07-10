@@ -60,14 +60,16 @@ describe('AuthService', () => {
 
       const result = await authService.signup(signupDto);
 
-      expect(userService.createUser).toHaveBeenCalledWith(
+      expect(userService.createUser.mock.calls[0]).toEqual([
         signupDto.email,
         signupDto.password,
-      );
-      expect(jwtService.signAsync).toHaveBeenCalledWith({
-        sub: mockUserWithoutPassword.id,
-        email: mockUserWithoutPassword.email,
-      });
+      ]);
+      expect(jwtService.signAsync.mock.calls[0]).toEqual([
+        {
+          sub: mockUserWithoutPassword.id,
+          email: mockUserWithoutPassword.email,
+        },
+      ]);
       expect(result).toEqual({
         user: mockUserWithoutPassword,
         access_token: 'mockAccessToken',
@@ -82,10 +84,10 @@ describe('AuthService', () => {
       await expect(authService.signup(signupDto)).rejects.toThrow(
         ConflictException,
       );
-      expect(userService.createUser).toHaveBeenCalledWith(
+      expect(userService.createUser.mock.calls[0]).toEqual([
         signupDto.email,
         signupDto.password,
-      );
+      ]);
     });
 
     it('should rethrow other errors from userService', async () => {
@@ -111,15 +113,17 @@ describe('AuthService', () => {
 
       const result = await authService.login(loginDto);
 
-      expect(userService.findByEmail).toHaveBeenCalledWith(loginDto.email);
-      expect(userService.validatePassword).toHaveBeenCalledWith(
+      expect(userService.findByEmail.mock.calls[0]).toEqual([loginDto.email]);
+      expect(userService.validatePassword.mock.calls[0]).toEqual([
         loginDto.password,
         mockUserWithPassword.password,
-      );
-      expect(jwtService.signAsync).toHaveBeenCalledWith({
-        sub: mockUserWithPassword.id,
-        email: mockUserWithPassword.email,
-      });
+      ]);
+      expect(jwtService.signAsync.mock.calls[0]).toEqual([
+        {
+          sub: mockUserWithPassword.id,
+          email: mockUserWithPassword.email,
+        },
+      ]);
       expect(result).toEqual({
         user: mockUserWithoutPassword,
         access_token: 'mockAccessToken',
@@ -132,8 +136,8 @@ describe('AuthService', () => {
       await expect(authService.login(loginDto)).rejects.toThrow(
         UnauthorizedException,
       );
-      expect(userService.findByEmail).toHaveBeenCalledWith(loginDto.email);
-      expect(userService.validatePassword).not.toHaveBeenCalled();
+      expect(userService.findByEmail.mock.calls[0]).toEqual([loginDto.email]);
+      expect(userService.validatePassword.mock.calls).toHaveLength(0);
     });
 
     it('should throw UnauthorizedException when password is invalid', async () => {
@@ -143,12 +147,12 @@ describe('AuthService', () => {
       await expect(authService.login(loginDto)).rejects.toThrow(
         UnauthorizedException,
       );
-      expect(userService.findByEmail).toHaveBeenCalledWith(loginDto.email);
-      expect(userService.validatePassword).toHaveBeenCalledWith(
+      expect(userService.findByEmail.mock.calls[0]).toEqual([loginDto.email]);
+      expect(userService.validatePassword.mock.calls[0]).toEqual([
         loginDto.password,
         mockUserWithPassword.password,
-      );
-      expect(jwtService.signAsync).not.toHaveBeenCalled();
+      ]);
+      expect(jwtService.signAsync.mock.calls).toHaveLength(0);
     });
   });
 
@@ -159,7 +163,7 @@ describe('AuthService', () => {
 
       const result = await authService.validateUser(userId);
 
-      expect(userService.findById).toHaveBeenCalledWith(userId);
+      expect(userService.findById.mock.calls[0]).toEqual([userId]);
       expect(result).toEqual(mockUserWithoutPassword);
     });
 
@@ -169,7 +173,7 @@ describe('AuthService', () => {
 
       const result = await authService.validateUser(userId);
 
-      expect(userService.findById).toHaveBeenCalledWith(userId);
+      expect(userService.findById.mock.calls[0]).toEqual([userId]);
       expect(result).toBeNull();
     });
   });

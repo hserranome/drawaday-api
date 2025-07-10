@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityRepository, EntityManager } from '@mikro-orm/sqlite';
 import { User } from '../entities/user.entity';
-import { UserWithoutPassword, NewUser } from '../models/user.model';
+import { UserWithoutPassword } from '../models/user.model';
 import * as bcrypt from 'bcrypt';
 import { v4 as uuidv4 } from 'uuid';
 

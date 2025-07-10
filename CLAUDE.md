@@ -4,7 +4,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Linting and Code Quality Guidelines
 
-- Disabling eslint rules (e.g., with eslint-disable comments) should only be used as a last resort or for clarity/future-proofing. Prefer to address linter warnings by refactoring code (such as removing unused parameters) whenever possible.
+- **IMPORTANT: Don't disable ESLint via comments, unless strictly obligatory.** Prefer to address linter warnings by refactoring code (such as removing unused parameters) whenever possible.
+- Disabling eslint rules (e.g., with eslint-disable comments) should only be used as a last resort or for clarity/future-proofing.
+
+## Type Safety and Code Reuse Guidelines
+
+- **When you need types, you must first search for existing ones to reuse.** Always check for existing DTOs, interfaces, and type definitions in the codebase before creating new ones.
+- Use the Grep tool to search for existing types with patterns like `interface.*Response`, `type.*Response`, `*Dto`, etc.
+- Prefer importing and reusing existing types from `src/common/dto/`, `src/models/`, and other established type locations.
+- Only create new types when existing ones don't meet the requirements.
 
 ## CORE DEVELOPMENT PRINCIPLES
 - Always follow the TDD cycle: Red → Green → Refactor

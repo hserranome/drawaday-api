@@ -1,6 +1,6 @@
 import { BadRequestException } from '@nestjs/common';
 import { ZodValidationPipe } from './zod-validation.pipe';
-import { z, ZodError } from 'zod';
+import { z } from 'zod';
 
 describe('ZodValidationPipe', () => {
   const testSchema = z.object({
@@ -63,7 +63,7 @@ describe('ZodValidationPipe', () => {
         fail('Should have thrown BadRequestException');
       } catch (error) {
         expect(error).toBeInstanceOf(BadRequestException);
-        expect(error.getResponse()).toEqual({
+        expect((error as BadRequestException).getResponse()).toEqual({
           message: 'Validation failed',
           errors: [
             {
@@ -86,7 +86,7 @@ describe('ZodValidationPipe', () => {
         fail('Should have thrown BadRequestException');
       } catch (error) {
         expect(error).toBeInstanceOf(BadRequestException);
-        expect(error.getResponse()).toEqual({
+        expect((error as BadRequestException).getResponse()).toEqual({
           message: 'Validation failed',
           errors: [
             {
@@ -109,7 +109,7 @@ describe('ZodValidationPipe', () => {
         fail('Should have thrown BadRequestException');
       } catch (error) {
         expect(error).toBeInstanceOf(BadRequestException);
-        expect(error.getResponse()).toEqual({
+        expect((error as BadRequestException).getResponse()).toEqual({
           message: 'Validation failed',
           errors: [
             {
@@ -135,7 +135,7 @@ describe('ZodValidationPipe', () => {
         fail('Should have thrown BadRequestException');
       } catch (error) {
         expect(error).toBeInstanceOf(BadRequestException);
-        expect(error.getResponse()).toEqual({
+        expect((error as BadRequestException).getResponse()).toEqual({
           message: 'Validation failed',
           errors: [
             {
@@ -170,7 +170,7 @@ describe('ZodValidationPipe', () => {
         fail('Should have thrown BadRequestException');
       } catch (error) {
         expect(error).toBeInstanceOf(BadRequestException);
-        expect(error.getResponse()).toEqual({
+        expect((error as BadRequestException).getResponse()).toEqual({
           message: 'Validation failed',
           errors: [
             {
@@ -187,7 +187,7 @@ describe('ZodValidationPipe', () => {
         parse: jest.fn().mockImplementation(() => {
           throw new Error('Some other error');
         }),
-      } as any;
+      } as unknown as z.ZodSchema;
 
       const pipeWithMockSchema = new ZodValidationPipe(mockSchema);
 
