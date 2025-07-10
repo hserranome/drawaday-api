@@ -1,11 +1,14 @@
 import { Injectable } from '@nestjs/common';
-import { User, UserWithoutPassword } from './user.interface';
+import { eq } from 'drizzle-orm';
+import { DatabaseService } from '../db/database.service';
+import { users } from '../db/schema';
+import { User, UserWithoutPassword, NewUser } from '../models/user.model';
 import * as bcrypt from 'bcrypt';
 import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class UserService {
-  private users: User[] = []; // In-memory storage for demo purposes
+  constructor(private readonly databaseService: DatabaseService) {}
 
   async createUser(
     email: string,
@@ -21,30 +24,46 @@ export class UserService {
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-    // Create new user
-    const newUser: User = {
+    // Create new user data
+    const newUserData: NewUser = {
       id: uuidv4(),
       email,
       password: hashedPassword,
-      createdAt: new Date(),
     };
 
-    this.users.push(newUser);
+    // Insert user into database
+    const [createdUser] = await this.databaseService.db
+      .insert(users)
+      .values(newUserData)
+      .returning();
 
     // Return user without password
-    const { password: _, ...userWithoutPassword } = newUser;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password: _, ...userWithoutPassword } = createdUser;
     return userWithoutPassword;
   }
 
   async findByEmail(email: string): Promise<User | undefined> {
-    return this.users.find((user) => user.email === email);
+    const [user] = await this.databaseService.db
+      .select()
+      .from(users)
+      .where(eq(users.email, email))
+      .limit(1);
+
+    return user;
   }
 
-  async findById(id: string): Promise<UserWithoutPassword | undefined> {
-    const user = this.users.find((user) => user.id === id);
-    if (!user) return undefined;
+  async findById(id: string): Promise<UserWithoutPassword | null> {
+    const [user] = await this.databaseService.db
+      .select()
+      .from(users)
+      .where(eq(users.id, id))
+      .limit(1);
 
-    const { password: _, ...userWithoutPassword } = user;
+    if (!user) return null;
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password: __, ...userWithoutPassword } = user;
     return userWithoutPassword;
   }
 
