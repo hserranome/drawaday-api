@@ -1,9 +1,4 @@
-import { IsEmail, IsString } from 'class-validator';
+import { loginSchema, LoginInput } from '../../models/user.model';
 
-export class LoginDto {
-  @IsEmail()
-  email: string;
-
-  @IsString()
-  password: string;
-}
+export const LoginDto = loginSchema;
+export type LoginDto = LoginInput;

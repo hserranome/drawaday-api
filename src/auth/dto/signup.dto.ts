@@ -1,10 +1,4 @@
-import { IsEmail, IsString, MinLength } from 'class-validator';
+import { signupSchema, SignupInput } from '../../models/user.model';
 
-export class SignupDto {
-  @IsEmail()
-  email: string;
-
-  @IsString()
-  @MinLength(6, { message: 'Password must be at least 6 characters long' })
-  password: string;
-}
+export const SignupDto = signupSchema;
+export type SignupDto = SignupInput;

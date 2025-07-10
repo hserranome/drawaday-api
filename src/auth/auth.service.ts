@@ -7,7 +7,7 @@ import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
 import { SignupDto } from './dto/signup.dto';
 import { LoginDto } from './dto/login.dto';
-import { UserWithoutPassword } from '../user/user.interface';
+import { UserWithoutPassword } from '../models/user.model';
 
 @Injectable()
 export class AuthService {
@@ -60,7 +60,8 @@ export class AuthService {
     const payload = { sub: user.id, email: user.email };
     const access_token = await this.jwtService.signAsync(payload);
 
-    const { password: _, ...userWithoutPassword } = user;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password: ___, ...userWithoutPassword } = user;
 
     return {
       user: userWithoutPassword,
