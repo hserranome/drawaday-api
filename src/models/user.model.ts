@@ -1,26 +1,29 @@
-import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
-import { users } from '../db/schema';
 import { z } from 'zod';
+import { User as UserEntity } from '../entities/user.entity';
 
-// Drizzle-inferred types
-export type User = typeof users.$inferSelect;
-export type NewUser = typeof users.$inferInsert;
+// Type based on MikroORM entity
+export type User = UserEntity;
+export type NewUser = Omit<User, 'createdAt'>;
 
-// Zod schemas generated from Drizzle schema
-export const insertUserSchema = createInsertSchema(users, {
-  email: (schema) => schema.email('Invalid email format'),
-  password: (schema) =>
-    schema.min(6, 'Password must be at least 6 characters long'),
+// Zod schemas for validation
+export const insertUserSchema = z.object({
+  id: z.string().uuid(),
+  email: z.string().email('Invalid email format'),
+  password: z.string().min(6, 'Password must be at least 6 characters long'),
 });
 
-export const selectUserSchema = createSelectSchema(users);
+export const selectUserSchema = z.object({
+  id: z.string().uuid(),
+  email: z.string().email(),
+  password: z.string(),
+  createdAt: z.date(),
+});
 
-export const updateUserSchema = createInsertSchema(users, {
-  id: (schema) => schema.optional(),
-  email: (schema) => schema.email('Invalid email format').optional(),
-  password: (schema) =>
-    schema.min(6, 'Password must be at least 6 characters long').optional(),
-  createdAt: (schema) => schema.optional(),
+export const updateUserSchema = z.object({
+  id: z.string().uuid().optional(),
+  email: z.string().email('Invalid email format').optional(),
+  password: z.string().min(6, 'Password must be at least 6 characters long').optional(),
+  createdAt: z.date().optional(),
 }).partial();
 
 // Utility types

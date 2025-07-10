@@ -1,9 +1,14 @@
 import { Module, Global } from '@nestjs/common';
-import { DatabaseService } from './database.service';
+import { MikroOrmModule } from '@mikro-orm/nestjs';
+import mikroOrmConfig from '../../mikro-orm.config';
+import { User } from '../entities/user.entity';
 
 @Global()
 @Module({
-  providers: [DatabaseService],
-  exports: [DatabaseService],
+  imports: [
+    MikroOrmModule.forRoot(mikroOrmConfig),
+    MikroOrmModule.forFeature([User]),
+  ],
+  exports: [MikroOrmModule],
 })
 export class DatabaseModule {}

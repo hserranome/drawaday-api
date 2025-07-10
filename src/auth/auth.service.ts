@@ -32,7 +32,10 @@ export class AuthService {
         access_token,
       };
     } catch (error) {
-      if (error.message === 'User with this email already exists') {
+      if (
+        error instanceof Error &&
+        error.message === 'User with this email already exists'
+      ) {
         throw new ConflictException('User with this email already exists');
       }
       throw error;
