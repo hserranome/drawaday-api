@@ -9,9 +9,10 @@ import {
   LoginResponseDto,
   UserResponseDto,
 } from '../src/common/dto/api-response.dto';
+import { Server } from 'net';
 
 describe('Authentication Flow (e2e)', () => {
-  let app: INestApplication;
+  let app: INestApplication<Server>;
   let orm: MikroORM;
 
   beforeAll(async () => {
