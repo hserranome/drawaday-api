@@ -29,8 +29,10 @@ describe('Authentication Flow (e2e)', () => {
 
     await app.init();
 
-    // Get database connection for cleanup
+    // Get database connection and ensure schema is created
     orm = app.get(MikroORM);
+    await orm.getSchemaGenerator().ensureDatabase();
+    await orm.getSchemaGenerator().createSchema();
   });
 
   afterAll(async () => {

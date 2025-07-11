@@ -4,7 +4,8 @@ import { User } from './src/entities/user.entity';
 
 export default defineConfig({
   entities: [User],
-  dbName: './data/database.sqlite',
+  dbName:
+    process.env.NODE_ENV === 'test' ? ':memory:' : './data/database.sqlite',
   driver: SqliteDriver,
   debug: false,
   migrations: {

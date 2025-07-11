@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
+import { MikroORM } from '@mikro-orm/core';
 import { AppModule } from '../../src/app.module';
 import { AuthService } from './auth.service';
 import { UserService } from '../user/user.service';
@@ -10,6 +11,7 @@ describe('AuthService (Integration)', () => {
   let authService: AuthService;
   let userService: UserService;
   let db: TestDatabase;
+  let orm: MikroORM;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -19,12 +21,18 @@ describe('AuthService (Integration)', () => {
     app = moduleFixture.createNestApplication();
     await app.init();
 
+    // Get MikroORM instance and ensure schema is created
+    orm = app.get(MikroORM);
+    await orm.getSchemaGenerator().ensureDatabase();
+    await orm.getSchemaGenerator().createSchema();
+
     authService = app.get(AuthService);
     userService = app.get(UserService);
     db = new TestDatabase(app);
   });
 
   afterAll(async () => {
+    await orm.close();
     await app.close();
   });
 
