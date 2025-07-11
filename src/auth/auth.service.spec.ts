@@ -3,8 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConflictException, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { UserService } from '../user/user.service';
-import { SignupDto } from './dto/signup.dto';
-import { LoginDto } from './dto/login.dto';
+import { SignupInput, LoginInput } from '../common/dto/auth.dto';
 import { UserWithoutPassword } from '../models/user.model';
 
 describe('AuthService', () => {
@@ -50,7 +49,7 @@ describe('AuthService', () => {
   });
 
   describe('signup', () => {
-    const signupDto: SignupDto = {
+    const signupDto: SignupInput = {
       email: 'test@example.com',
       password: 'password123',
     };
@@ -92,7 +91,7 @@ describe('AuthService', () => {
   });
 
   describe('login', () => {
-    const loginDto: LoginDto = {
+    const loginDto: LoginInput = {
       email: 'test@example.com',
       password: 'password123',
     };

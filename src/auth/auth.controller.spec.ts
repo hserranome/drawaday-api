@@ -2,8 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ConflictException, UnauthorizedException } from '@nestjs/common';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { SignupDto } from './dto/signup.dto';
-import { LoginDto } from './dto/login.dto';
+import { SignupInput, LoginInput } from '../common/dto/auth.dto';
 import { UserWithoutPassword } from '../models/user.model';
 
 describe('AuthController', () => {
@@ -37,7 +36,7 @@ describe('AuthController', () => {
   });
 
   describe('signup', () => {
-    const validSignupDto: SignupDto = {
+    const validSignupDto: SignupInput = {
       email: 'test@example.com',
       password: 'password123',
     };
@@ -73,7 +72,7 @@ describe('AuthController', () => {
   });
 
   describe('login', () => {
-    const validLoginDto: LoginDto = {
+    const validLoginDto: LoginInput = {
       email: 'test@example.com',
       password: 'password123',
     };

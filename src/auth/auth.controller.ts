@@ -16,8 +16,12 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
-import { SignupDto } from './dto/signup.dto';
-import { LoginDto } from './dto/login.dto';
+import {
+  signupSchema,
+  loginSchema,
+  SignupInput,
+  LoginInput,
+} from '../common/dto/auth.dto';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
 import {
   SignupRequestDto,
@@ -37,7 +41,7 @@ export class AuthController {
 
   @Post('signup')
   @HttpCode(HttpStatus.CREATED)
-  @UsePipes(new ZodValidationPipe(SignupDto))
+  @UsePipes(new ZodValidationPipe(signupSchema))
   @ApiOperation({
     summary: 'Register a new user',
     description:
@@ -60,13 +64,13 @@ export class AuthController {
     description: 'User with this email already exists',
     type: ErrorResponseDto,
   })
-  async signup(@Body() signupDto: SignupDto) {
+  async signup(@Body() signupDto: SignupInput) {
     return this.authService.signup(signupDto);
   }
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  @UsePipes(new ZodValidationPipe(LoginDto))
+  @UsePipes(new ZodValidationPipe(loginSchema))
   @ApiOperation({
     summary: 'Authenticate user',
     description:
@@ -89,7 +93,7 @@ export class AuthController {
     description: 'Invalid credentials',
     type: ErrorResponseDto,
   })
-  async login(@Body() loginDto: LoginDto) {
+  async login(@Body() loginDto: LoginInput) {
     return this.authService.login(loginDto);
   }
 }
