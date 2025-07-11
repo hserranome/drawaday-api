@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@mikro-orm/nestjs';
-import { EntityManager } from '@mikro-orm/sqlite';
+import { EntityManager } from '@mikro-orm/better-sqlite';
 import { UserService } from './user.service';
 import { User } from '../entities/user.entity';
 import * as bcrypt from 'bcrypt';

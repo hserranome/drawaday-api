@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@mikro-orm/nestjs';
-import { EntityRepository, EntityManager } from '@mikro-orm/sqlite';
+import { EntityRepository, EntityManager } from '@mikro-orm/better-sqlite';
 import { User } from '../entities/user.entity';
 import { UserWithoutPassword } from '../models/user.model';
 import * as bcrypt from 'bcrypt';
