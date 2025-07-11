@@ -4,7 +4,7 @@ import { z } from 'zod';
 
 describe('ZodValidationPipe', () => {
   const testSchema = z.object({
-    email: z.string().email('Invalid email format'),
+    email: z.email('Invalid email format'),
     password: z.string().min(6, 'Password must be at least 6 characters'),
     age: z.number().optional(),
   });
@@ -16,7 +16,7 @@ describe('ZodValidationPipe', () => {
   });
 
   describe('transform', () => {
-    it('should return parsed value when data is valid', () => {
+    it('should return the parsed value when the data is valid', () => {
       const validData = {
         email: 'test@example.com',
         password: 'password123',
@@ -28,7 +28,7 @@ describe('ZodValidationPipe', () => {
       expect(result).toEqual(validData);
     });
 
-    it('should return parsed value without optional fields', () => {
+    it('should return the parsed value when the data is valid and optional fields are missing', () => {
       const validDataWithoutOptional = {
         email: 'test@example.com',
         password: 'password123',
@@ -39,7 +39,7 @@ describe('ZodValidationPipe', () => {
       expect(result).toEqual(validDataWithoutOptional);
     });
 
-    it('should transform and validate data types', () => {
+    it('should throw a BadRequestException when the data type is invalid', () => {
       const dataWithStringAge = {
         email: 'test@example.com',
         password: 'password123',
@@ -52,7 +52,7 @@ describe('ZodValidationPipe', () => {
       );
     });
 
-    it('should throw BadRequestException with proper error format for invalid email', () => {
+    it('should throw a BadRequestException with a specific error format when the email is invalid', () => {
       const invalidData = {
         email: 'invalid-email',
         password: 'password123',
@@ -75,7 +75,7 @@ describe('ZodValidationPipe', () => {
       }
     });
 
-    it('should throw BadRequestException with proper error format for short password', () => {
+    it('should throw a BadRequestException with a specific error format when the password is too short', () => {
       const invalidData = {
         email: 'test@example.com',
         password: '12345',
@@ -98,7 +98,7 @@ describe('ZodValidationPipe', () => {
       }
     });
 
-    it('should throw BadRequestException with multiple errors', () => {
+    it('should throw a BadRequestException with multiple errors when multiple fields are invalid', () => {
       const invalidData = {
         email: 'invalid-email',
         password: '123',
@@ -125,7 +125,7 @@ describe('ZodValidationPipe', () => {
       }
     });
 
-    it('should throw BadRequestException for missing required fields', () => {
+    it('should throw a BadRequestException when a required field is missing', () => {
       const invalidData = {
         email: 'test@example.com',
       };
@@ -147,7 +147,7 @@ describe('ZodValidationPipe', () => {
       }
     });
 
-    it('should handle nested field paths correctly', () => {
+    it('should correctly handle nested field paths in the error response', () => {
       const nestedSchema = z.object({
         user: z.object({
           profile: z.object({
@@ -182,7 +182,7 @@ describe('ZodValidationPipe', () => {
       }
     });
 
-    it('should throw generic BadRequestException for non-ZodError', () => {
+    it('should throw a generic BadRequestException when a non-ZodError is thrown', () => {
       const mockSchema = {
         parse: jest.fn().mockImplementation(() => {
           throw new Error('Some other error');

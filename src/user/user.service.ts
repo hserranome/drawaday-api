@@ -18,8 +18,9 @@ export class UserService {
     email: string,
     password: string,
   ): Promise<UserWithoutPassword> {
+    const em = this.em.fork();
     // Check if user already exists
-    const existingUser = await this.findByEmail(email);
+    const existingUser = await em.findOne(User, { email });
     if (existingUser) {
       throw new Error('User with this email already exists');
     }
@@ -32,7 +33,7 @@ export class UserService {
     const user = new User(uuidv4(), email, hashedPassword);
 
     // Insert user into database
-    await this.em.persistAndFlush(user);
+    await em.persistAndFlush(user);
 
     // Return user without password
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -41,11 +42,11 @@ export class UserService {
   }
 
   async findByEmail(email: string): Promise<User | null> {
-    return await this.userRepository.findOne({ email });
+    return await this.em.fork().findOne(User, { email });
   }
 
   async findById(id: string): Promise<UserWithoutPassword | null> {
-    const user = await this.userRepository.findOne({ id });
+    const user = await this.em.fork().findOne(User, { id });
 
     if (!user) return null;
 

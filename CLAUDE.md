@@ -163,3 +163,20 @@ pnpm run format          # Prettier formatting
 - Tests located in `src/` directory with `.spec.ts` suffix
 - Coverage reports generated in `coverage/` directory
 - API test utilities in `test/api-test.js` for integration testing
+
+## Git Branch Naming Convention
+
+Branch names should follow this structure: `<type>/<description>`
+
+Supported types:
+- `feature/` - New features or enhancements
+- `bugfix/` - Bug fixes
+- `hotfix/` - Critical fixes for production
+- `release/` - Release preparation
+- `chore/` - Maintenance tasks, refactoring, or tooling changes
+
+Examples:
+- `feature/user-authentication`
+- `bugfix/login-validation-error`
+- `hotfix/security-patch`
+- `chore/update-dependencies`

@@ -2,7 +2,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { MikroORM } from '@mikro-orm/core';
-import { EntityRepository } from '@mikro-orm/sqlite';
 import { AppModule } from '../../src/app.module';
 import { User } from '../../src/entities/user.entity';
 import { ZodExceptionFilter } from '../../src/common/filters/zod-exception.filter';
@@ -127,62 +126,19 @@ export const testUsers = {
 };
 
 /**
- * Common test assertions
- */
-export const testAssertions = {
-  shouldHaveUserResponse: (response: Record<string, unknown>) => {
-    expect(response).toHaveProperty('user');
-    expect(response).toHaveProperty('access_token');
-    expect(response.user).not.toHaveProperty('password');
-    expect(response.user).toHaveProperty('id');
-    expect(response.user).toHaveProperty('email');
-    expect(response.user).toHaveProperty('createdAt');
-  },
-
-  shouldHaveValidationError: (
-    response: Record<
-      string,
-      {
-        body: {
-          message: string;
-          errors: Array<{ field: string; message: string }>;
-        };
-      }
-    >,
-    field: string,
-    message: string,
-  ) => {
-    expect(response.body.message).toBe('Validation failed');
-    expect(response.body.errors).toContainEqual({
-      field,
-      message,
-    });
-  },
-
-  shouldBeUnauthorized: (
-    response: Record<string, { status: number; body: { message: string } }>,
-  ) => {
-    expect(response.status).toBe(401);
-    expect(response.body.message).toBe('Unauthorized');
-  },
-};
-
-/**
  * Database setup and teardown helpers
  */
 export class TestDatabase {
   private app: INestApplication;
   private orm: MikroORM;
-  private userRepository: EntityRepository<User>;
 
   constructor(app: INestApplication) {
     this.app = app;
     this.orm = app.get(MikroORM);
-    this.userRepository = this.orm.em.getRepository(User);
   }
 
   async cleanup(): Promise<void> {
-    await this.userRepository.nativeDelete({});
+    await this.orm.em.fork().nativeDelete(User, {});
   }
 
   async createUser(userData: TestUser): Promise<UserWithoutPassword> {
@@ -191,11 +147,11 @@ export class TestDatabase {
   }
 
   async findUserByEmail(email: string): Promise<User | null> {
-    return await this.userRepository.findOne({ email });
+    return await this.orm.em.fork().findOne(User, { email });
   }
 
   async getUserCount(): Promise<number> {
-    return await this.userRepository.count();
+    return await this.orm.em.fork().count(User, {});
   }
 }
 

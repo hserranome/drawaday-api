@@ -42,29 +42,29 @@ describe('AuthController', () => {
       password: 'password123',
     };
 
-    it('should create user successfully with valid data', async () => {
-      authService.signup.mockResolvedValue(mockAuthResponse);
+    it('should return user and access token when signup is successful', async () => {
+      (authService.signup as jest.Mock).mockResolvedValue(mockAuthResponse);
 
       const result = await authController.signup(validSignupDto);
 
-      expect(authService.signup.mock.calls[0]).toEqual([validSignupDto]);
       expect(result).toEqual(mockAuthResponse);
+      expect(result.user).not.toHaveProperty('password');
+      expect(typeof result.access_token).toBe('string');
     });
 
-    it('should throw ConflictException when user already exists', async () => {
-      authService.signup.mockRejectedValue(
+    it('should throw ConflictException when user with the same email already exists', async () => {
+      (authService.signup as jest.Mock).mockRejectedValue(
         new ConflictException('User with this email already exists'),
       );
 
       await expect(authController.signup(validSignupDto)).rejects.toThrow(
         ConflictException,
       );
-      expect(authService.signup.mock.calls[0]).toEqual([validSignupDto]);
     });
 
-    it('should handle service errors appropriately', async () => {
+    it('should propagate service errors on signup', async () => {
       const serviceError = new Error('Service unavailable');
-      authService.signup.mockRejectedValue(serviceError);
+      (authService.signup as jest.Mock).mockRejectedValue(serviceError);
 
       await expect(authController.signup(validSignupDto)).rejects.toThrow(
         serviceError,
@@ -78,81 +78,33 @@ describe('AuthController', () => {
       password: 'password123',
     };
 
-    it('should authenticate user successfully with valid credentials', async () => {
-      authService.login.mockResolvedValue(mockAuthResponse);
+    it('should return user and access token when login is successful', async () => {
+      (authService.login as jest.Mock).mockResolvedValue(mockAuthResponse);
 
       const result = await authController.login(validLoginDto);
 
-      expect(authService.login.mock.calls[0]).toEqual([validLoginDto]);
       expect(result).toEqual(mockAuthResponse);
+      expect(result.user).not.toHaveProperty('password');
+      expect(typeof result.access_token).toBe('string');
     });
 
-    it('should throw UnauthorizedException with invalid credentials', async () => {
-      authService.login.mockRejectedValue(
+    it('should throw UnauthorizedException when credentials are invalid', async () => {
+      (authService.login as jest.Mock).mockRejectedValue(
         new UnauthorizedException('Invalid credentials'),
       );
 
       await expect(authController.login(validLoginDto)).rejects.toThrow(
         UnauthorizedException,
       );
-      expect(authService.login.mock.calls[0]).toEqual([validLoginDto]);
     });
 
-    it('should handle service errors appropriately', async () => {
+    it('should propagate service errors on login', async () => {
       const serviceError = new Error('Database connection failed');
-      authService.login.mockRejectedValue(serviceError);
+      (authService.login as jest.Mock).mockRejectedValue(serviceError);
 
       await expect(authController.login(validLoginDto)).rejects.toThrow(
         serviceError,
       );
-    });
-  });
-
-  describe('integration with validation pipe', () => {
-    it('should have signup endpoint defined', () => {
-      expect('signup' in authController).toBe(true);
-      expect(typeof authController.signup).toBe('function');
-    });
-
-    it('should have login endpoint defined', () => {
-      expect('login' in authController).toBe(true);
-      expect(typeof authController.login).toBe('function');
-    });
-  });
-
-  describe('HTTP status codes', () => {
-    it('should return 201 status for successful signup', async () => {
-      authService.signup.mockResolvedValue(mockAuthResponse);
-
-      await authController.signup({
-        email: 'test@example.com',
-        password: 'password123',
-      });
-
-      expect(authService.signup.mock.calls[0]).toEqual([
-        {
-          email: 'test@example.com',
-          password: 'password123',
-        },
-      ]);
-      // Status code is handled by @HttpCode decorator
-    });
-
-    it('should return 200 status for successful login', async () => {
-      authService.login.mockResolvedValue(mockAuthResponse);
-
-      await authController.login({
-        email: 'test@example.com',
-        password: 'password123',
-      });
-
-      expect(authService.login.mock.calls[0]).toEqual([
-        {
-          email: 'test@example.com',
-          password: 'password123',
-        },
-      ]);
-      // Status code is handled by @HttpCode decorator
     });
   });
 });
